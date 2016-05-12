@@ -5,35 +5,35 @@
  */
 package com.sf.kyc.vas.service;
 
-import com.sf.biocapture.entity.security.KMUser;
-import com.sf.kyc.vas.dao.KmUserDao;
-import com.sf.kyc.vas.dao.TransactionHistoryDao;
-import com.sf.kyc.vas.dao.VtuUserDao;
-import com.sf.kyc.vas.dao.VtuWalletDao;
-import com.sf.kyc.vas.entity.TransactionHistory;
-import com.sf.kyc.vas.entity.VtuUser;
-import com.sf.kyc.vas.entity.VtuWallet;
-import com.sf.kyc.vas.enums.ClientTransactionChannelType;
-import com.sf.kyc.vas.enums.TransactionCategory;
-import com.sf.kyc.vas.enums.TransactionStatus;
-import com.sf.kyc.vas.enums.TransactionType;
-import com.sf.kyc.vas.enums.WalletType;
+import com.sf.kyc.vas.dao.VasTransactionLogDao;
+import com.sf.kyc.vas.dao.DataBundleDao;
+import com.sf.kyc.vas.dao.TariffPlanDao;
+import com.sf.kyc.vas.dao.VoiceBundleDao;
+import com.sf.kyc.vas.entity.DataBundle;
+import com.sf.kyc.vas.entity.TariffPlan;
+import com.sf.kyc.vas.entity.VasTransactionLog;
+import com.sf.kyc.vas.entity.VoiceBundle;
+import com.sf.kyc.vas.enums.ClientRequestChannelType;
+import com.sf.kyc.vas.enums.RequestCategory;
+import com.sf.kyc.vas.enums.RequestInterface;
+import com.sf.kyc.vas.enums.RequestStatus;
+import com.sf.kyc.vas.model.DataBundleList;
 import com.sf.kyc.vas.model.GenericResponse;
-import com.sf.kyc.vas.model.VasIdRequest;
-import com.sf.kyc.vas.model.VtuTopUpRequest;
-import com.sf.kyc.vas.model.WalletBalanceResponse;
-import com.sf.kyc.vas.util.CryptoUtils;
-import com.sf.kyc.vas.util.RSAServiceUtil;
+import com.sf.kyc.vas.model.TariffPlanChangeRequest;
+import com.sf.kyc.vas.model.TariffPlanList;
+import com.sf.kyc.vas.model.VasLogRequest;
+import com.sf.kyc.vas.model.VoiceBundleList;
+import com.sf.kyc.vas.soap.webservice.artifact.IAirService;
 import com.sf.kyc.vas.util.Utilities;
+import com.sf.kyc.vas.webservice.template.BaseSoapTemplate;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.log4j.Log4j;
-import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,220 +45,199 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class VasService {
 
+    @Value("${airtel.vas.url}")
+    private String airtelWsdlUrl;
+
+    @Value("${kyc.client.identifier}")
+    private String kycClientIdentifier;
+
     @Inject
-    VtuUserDao vtuUserDao;
+    DataBundleDao dataBundleDao;
     @Inject
-    KmUserDao kmUserDao;
+    TariffPlanDao tariffPlanDao;
     @Inject
-    VtuWalletDao vtuWalletDao;
+    VasTransactionLogDao vasTransactionLogDao;
     @Inject
-    TransactionHistoryDao transactionHistoryDao;
+    VoiceBundleDao voiceBundleDao;
 
     @Transactional
-    public GenericResponse getVasClientId(VasIdRequest vasIdRequest, String ipAddress) {
-        GenericResponse response = new GenericResponse();
-        VtuUser vu = vtuUserDao.getVtuUserByEmail(vasIdRequest.getEmail());
-        if (vu == null) {
-            response.setResponseCode("02");
-            response.setResponseDescription("Could not get VTU user");
-            return response;
-        }
-        if (vu.getVasClientId() == null) {
-            response.setResponseCode("03");
-            response.setResponseDescription("Could not get user vas client id");
-            return response;
-        }
-        if (!vu.isActive()) {
-            response.setResponseCode("04");
-            response.setResponseDescription("VTU user account is disabled");
-            return response;
-        }
-        response.setResponseCode("00");
-        response.setResponseDescription("VTU user vas client id successfully retrieved");
-        response.setAppId(new String(Base64.encodeBase64(vu.getVasClientId().getBytes(Charset.forName("UTF-8")))));
-        return response;
-    }
-
-    @Transactional
-    public WalletBalanceResponse getWalletBalance(VasIdRequest vasIdRequest, String encryptedAppId, String ipAddress) {
-        WalletBalanceResponse response = new WalletBalanceResponse();
-        VtuUser vu = vtuUserDao.getVtuUserByEmail(vasIdRequest.getEmail());
-        if (vu == null) {
-            response.setResponseCode("02");
-            response.setResponseDescription("Could not get VTU user");
-            return response;
-        }
-        if (vu.getVasClientId() == null) {
-            response.setResponseCode("03");
-            response.setResponseDescription("Could not get user vas client id");
-            return response;
-        }
-        if (!vu.isActive()) {
-            response.setResponseCode("04");
-            response.setResponseDescription("VTU user account is disabled");
-            return response;
-        }
-        VtuWallet vw = vtuWalletDao.getVtuWalletByVtuUserId(vu.getPk());
-        if (vw == null) {
-            response.setResponseCode("05");
-            response.setResponseDescription("Could not get user wallet information");
-            return response;
-        }
-        response.setResponseCode("00");
-        response.setResponseDescription("VTU user vas client id successfully retrieved");
-        response.setAvailableBalance(Utilities.format(vw.getAvailableBalance()));
-        response.setBookBalance(Utilities.format(vw.getBookBalance()));
-        response.setWalletId(vw.getWalletId());
-
-        return response;
-    }
-
-    @Transactional
-    public GenericResponse customerTopUp(VtuTopUpRequest vtuTopUpRequest, String encryptedAppId, String ipAddress) {
-        RSAServiceUtil rsu = new RSAServiceUtil();
-        GenericResponse response = new GenericResponse();
+    public GenericResponse changeTariffPlan(TariffPlanChangeRequest tariffPlanChangeRequest) {
+        GenericResponse resp = new GenericResponse();
+        boolean done = false;
+        BaseSoapTemplate soapTemplate = new BaseSoapTemplate();
         try {
-            VtuUser vu = vtuUserDao.getVtuUserByEmail(vtuTopUpRequest.getUsername());
-            if (vu == null) {
-                response.setResponseCode("02");
-                response.setResponseDescription("Could not get VTU user");
-                return response;
-            }
-            if (vu.getVasClientId() == null) {
-                response.setResponseCode("03");
-                response.setResponseDescription("Could not get user vas client id");
-                return response;
-            }
-            if (!vu.isActive()) {
-                response.setResponseCode("04");
-                response.setResponseDescription("VTU user account is disabled");
-                return response;
-            }
-            VtuWallet vw = vtuWalletDao.getVtuWalletByVtuUserId(vu.getPk());
-            if (vw == null) {
-                response.setResponseCode("05");
-                response.setResponseDescription("Could not get user wallet information");
-                return response;
-            }
-
-            VtuWallet vw2 = vtuWalletDao.getVtuWalletByWalletId(vtuTopUpRequest.getWalletId());
-            if (vw2 == null) {
-                response.setResponseCode("05");
-                response.setResponseDescription("Could not get user wallet information");
-                return response;
-            }
-            if (!(vw.getWalletId().equalsIgnoreCase(vw2.getWalletId()))) {
-                response.setResponseCode("09");
-                response.setResponseDescription("Agent Wallet account mis-match");
-                return response;
-            }
-            VtuWallet seamfixWallet = vtuWalletDao.getVtuWalletByWalletType(WalletType.SEAMFIX);
-            if (seamfixWallet == null) {
-                response.setResponseCode("07");
-                response.setResponseDescription("System error");
-                return response;
-            }
-            rsu.initiate("vtupuk.key", "vtupvk.key");
-            String clearPin = rsu.decrypt(vtuTopUpRequest.getEncryptedPin());
-            boolean isPinValid = CryptoUtils.validatePassword(clearPin, vu.getPin(), true);
-            if (!isPinValid) {
-                response.setResponseCode("08");
-                response.setResponseDescription("Invalid pin");
-                return response;
-            }
-            if (vtuTopUpRequest.getAmount() > vw.getAvailableBalance().doubleValue()) {
-                response.setResponseCode("10");
-                response.setResponseDescription("Insufficient balance");
-                return response;
-            }
-            vw.setAvailableBalance(vw.getAvailableBalance().subtract(new BigDecimal(vtuTopUpRequest.getAmount())));
-            vw.setBookBalance(vw.getBookBalance().subtract(new BigDecimal(vtuTopUpRequest.getAmount())));
-            seamfixWallet.setAvailableBalance(seamfixWallet.getAvailableBalance().add(new BigDecimal(vtuTopUpRequest.getAmount())));
-            seamfixWallet.setBookBalance(seamfixWallet.getBookBalance().add(new BigDecimal(vtuTopUpRequest.getAmount())));
-            vtuWalletDao.save(vw);
-            vtuWalletDao.save(seamfixWallet);
-            TransactionHistory debitLegTtrnHis = new TransactionHistory();
-            TransactionHistory creditLegTtrnHis = new TransactionHistory();
-            if (vtuTopUpRequest.getVtuType().equalsIgnoreCase("DATA")) {
-                debitLegTtrnHis.setTransactionCategory(TransactionCategory.VTU_DATA_TOPUP);
-                creditLegTtrnHis.setTransactionCategory(TransactionCategory.VTU_DATA_TOPUP);
+            IAirService service = soapTemplate.getAirtelServiceViaWsdlUrl(airtelWsdlUrl);
+            done = service.changeServiceClass(tariffPlanChangeRequest.getCustomerMsisdn(), tariffPlanChangeRequest.getServiceClass(), kycClientIdentifier);
+            if (done) {
+                resp.setResponseCode("00");
+                resp.setResponseDescription("Customer tariff plan change successful");
             } else {
-                debitLegTtrnHis.setTransactionCategory(TransactionCategory.VTU_AIRTIME_TOPUP);
-                creditLegTtrnHis.setTransactionCategory(TransactionCategory.VTU_AIRTIME_TOPUP);
+                resp.setResponseCode("06");
+                resp.setResponseDescription("A Gateway service error occurred.");
             }
-            if (vtuTopUpRequest.getClientChannel().equalsIgnoreCase("ANDROID")) {
-                debitLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.ANDROID);
-                creditLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.ANDROID);
-            } else if (vtuTopUpRequest.getClientChannel().equalsIgnoreCase("WINDOWS")) {
-                debitLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.WINDOWS);
-                creditLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.WINDOWS);
-            } else {
-                debitLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.RICA);
-                creditLegTtrnHis.setClientTransactionChannelType(ClientTransactionChannelType.RICA);
-            }
-            KMUser ku = kmUserDao.load(1L);
-            if (ku != null) {
-                debitLegTtrnHis.setCheckerId(ku);
-                debitLegTtrnHis.setMakerId(ku);
-                creditLegTtrnHis.setCheckerId(ku);
-                creditLegTtrnHis.setMakerId(ku);
-            }
-            debitLegTtrnHis.setAmount(vtuTopUpRequest.getAmount());
-            creditLegTtrnHis.setAmount(vtuTopUpRequest.getAmount());
-
-            debitLegTtrnHis.setMsisdn(vtuTopUpRequest.getMsisdn());
-            creditLegTtrnHis.setMsisdn(vtuTopUpRequest.getMsisdn());
-
-            debitLegTtrnHis.setNarration(vtuTopUpRequest.getMsisdn() + "--" + vtuTopUpRequest.getVtuType());
-            creditLegTtrnHis.setNarration(vtuTopUpRequest.getMsisdn() + "--" + vtuTopUpRequest.getVtuType());
-
-            debitLegTtrnHis.setPaymentChannel("WALLET");
-            creditLegTtrnHis.setPaymentChannel("WALLET");
-
-            debitLegTtrnHis.setResponseCode("00");
-            creditLegTtrnHis.setResponseCode("00");
-            String ref = Utilities.externalRefNo();
-            debitLegTtrnHis.setResponseReference(ref);
-            creditLegTtrnHis.setResponseReference(ref);
-
-            debitLegTtrnHis.setResponseReference(Utilities.externalRefNo());
-            creditLegTtrnHis.setResponseReference(Utilities.externalRefNo());
-
-            Date now = new Date();
-
-            debitLegTtrnHis.setTransactionDate(new Timestamp(now.getTime()));
-            creditLegTtrnHis.setTransactionDate(new Timestamp(now.getTime()));
-
-            debitLegTtrnHis.setTransactionReference(ref);
-            creditLegTtrnHis.setTransactionReference(ref);
-
-            debitLegTtrnHis.setTransactionStatus(TransactionStatus.SUCCESSFUL);
-            creditLegTtrnHis.setTransactionStatus(TransactionStatus.SUCCESSFUL);
-
-            debitLegTtrnHis.setTransactionType(TransactionType.DEBIT);
-            creditLegTtrnHis.setTransactionType(TransactionType.CREDIT);
-
-            debitLegTtrnHis.setVtuWallet(vw);
-            creditLegTtrnHis.setVtuWallet(seamfixWallet);
-
-            debitLegTtrnHis.setWalletId(vw.getWalletId());
-            creditLegTtrnHis.setWalletId(seamfixWallet.getWalletId());
-
-            debitLegTtrnHis.setWalletType(vw.getWalletType());
-            creditLegTtrnHis.setWalletType(seamfixWallet.getWalletType());
-
-            transactionHistoryDao.save(debitLegTtrnHis);
-            transactionHistoryDao.save(creditLegTtrnHis);
 
         } catch (Exception ex) {
-            Logger.getLogger(VasService.class.getName()).log(Level.SEVERE, null, ex);
-            response.setResponseCode("07");
-            response.setResponseDescription("System error");
-            return response;
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+            resp.setResponseCode("02");
+            resp.setResponseDescription("A KYC service error occurred");
         }
-        response.setResponseCode("00");
-        response.setResponseDescription("User topup was successfully");
-        return response;
+        return resp;
+    }
+
+    @Transactional
+    public GenericResponse logVasrequest(VasLogRequest vasLogRequest) {
+        GenericResponse resp = new GenericResponse();
+        try {
+            VasTransactionLog vasLog = new VasTransactionLog();
+            vasLog.setAmount(new BigDecimal(vasLogRequest.getAmount()));
+            vasLog.setClientVasRequestChannelType(ClientRequestChannelType.ANDROID);
+            if (vasLogRequest.getClientVasRequestChannelType().equalsIgnoreCase("WINDOWS")) {
+                vasLog.setClientVasRequestChannelType(ClientRequestChannelType.WINDOWS);
+            }
+            vasLog.setCustomerMsisdn(vasLogRequest.getCustomerMsisdn());
+            vasLog.setDeviceMacAddress(vasLogRequest.getDeviceMacAddress());
+            vasLog.setNarration(vasLogRequest.getNarration());
+            vasLog.setProductCode(vasLogRequest.getProductCode());
+            vasLog.setProductName(vasLogRequest.getProductName());
+            vasLog.setRequestDate(new Timestamp(vasLogRequest.getRequestDate().getTime()));
+            vasLog.setRequestInterface(RequestInterface.API);
+            if (vasLogRequest.getRequestInterface().equalsIgnoreCase("SMS")) {
+                vasLog.setRequestInterface(RequestInterface.SMS);
+            }
+            vasLog.setRequestXml("");
+            vasLog.setResponseCode("");
+            vasLog.setResponseReference("");
+            vasLog.setResponseXml("");
+            vasLog.setSenderId(vasLogRequest.getSenderId());
+            vasLog.setVasRequestReference(vasLogRequest.getVasRequestReference());
+            vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+            if (vasLogRequest.getVasRequestStatus().equalsIgnoreCase("NOT_SENT")) {
+                vasLog.setVasRequestStatus(RequestStatus.NOT_SENT);
+            } else if (vasLogRequest.getVasRequestStatus().equalsIgnoreCase("SENT")) {
+                vasLog.setVasRequestStatus(RequestStatus.SENT);
+            }
+            vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
+            if (vasLogRequest.getVasRequestCategory().equalsIgnoreCase("AIR_TIME_TOPUP")) {
+                vasLog.setVasRequestCategory(RequestCategory.AIR_TIME_TOPUP);
+            } else if (vasLogRequest.getVasRequestCategory().equalsIgnoreCase("DATA_BUNDLE_TOPUP")) {
+                vasLog.setVasRequestCategory(RequestCategory.DATA_BUNDLE_TOPUP);
+            } else if (vasLogRequest.getVasRequestCategory().equalsIgnoreCase("VOICE_BUNDLE_SWITCH")) {
+                vasLog.setVasRequestCategory(RequestCategory.VOICE_BUNDLE_SWITCH);
+            }
+
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+            resp.setResponseCode("02");
+            resp.setResponseDescription("A KYC service error occurred");
+        }
+        return resp;
+    }
+
+    @Transactional
+    public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest) {
+        boolean resp = false;
+        try {
+            VasTransactionLog vasLog = new VasTransactionLog();
+            vasLog.setAmount(BigDecimal.ZERO);
+            vasLog.setClientVasRequestChannelType(ClientRequestChannelType.ANDROID);
+            if (tariffPlanChangeRequest.getClientVasRequestChannelType().equalsIgnoreCase("WINDOWS")) {
+                vasLog.setClientVasRequestChannelType(ClientRequestChannelType.WINDOWS);
+            }
+            vasLog.setCustomerMsisdn(tariffPlanChangeRequest.getCustomerMsisdn());
+            vasLog.setDeviceMacAddress("Tariff Plan Changr");
+            vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            vasLog.setRequestDate(new Timestamp(new Date().getTime()));
+            vasLog.setRequestInterface(RequestInterface.API);
+
+            vasLog.setRequestXml("");
+            vasLog.setResponseCode("");
+            vasLog.setResponseReference("");
+            vasLog.setResponseXml("");
+            vasLog.setSenderId(tariffPlanChangeRequest.getSenderId());
+            vasLog.setVasRequestReference(tariffPlanChangeRequest.getReference());
+            vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+            vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
+            vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
+
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+
+        }
+        return resp;
+    }
+
+    @Transactional
+    public TariffPlanList getTariffPlans() {
+        TariffPlanList tariffPlanList = new TariffPlanList();
+        List<com.sf.kyc.vas.model.TariffPlan> tariffPlans = new ArrayList<>();
+        try {
+            for (TariffPlan tariffPlan : tariffPlanDao.findAll()) {
+                com.sf.kyc.vas.model.TariffPlan tp = new com.sf.kyc.vas.model.TariffPlan();
+                tp.setPlanName(tariffPlan.getPlanName());
+                tp.setServiceClass(tariffPlan.getServiceClass());
+                tp.setVersionCount(tariffPlan.getVersionCount());
+                tariffPlans.add(tp);
+            }
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+        }
+        tariffPlanList.setTariffplans(tariffPlans);
+        return tariffPlanList;
+    }
+
+    @Transactional
+    public DataBundleList getDataBundles() {
+        DataBundleList dataBundleList = new DataBundleList();
+        List<com.sf.kyc.vas.model.DataBundle> dataBundles = new ArrayList<>();
+        try {
+            for (DataBundle dataBundle : dataBundleDao.findAll()) {
+                com.sf.kyc.vas.model.DataBundle db = new com.sf.kyc.vas.model.DataBundle();
+                db.setErcProductCategory(dataBundle.getErcProductCategory());
+                db.setPretupsValue(dataBundle.getPretupsValue());
+                db.setProductName(dataBundle.getProductName());
+                db.setProductValue(dataBundle.getProductValue());
+                db.setVersionCount(dataBundle.getVersionCount());
+                dataBundles.add(db);
+            }
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+        }
+        dataBundleList.setDatabundles(dataBundles);
+        return dataBundleList;
+    }
+
+    @Transactional
+    public VoiceBundleList getVoiceBundles() {
+        VoiceBundleList voiceBundleList = new VoiceBundleList();
+        List<com.sf.kyc.vas.model.VoiceBundle> voiceBundles = new ArrayList<>();
+        try {
+            for (VoiceBundle voiceBundle : voiceBundleDao.findAll()) {
+                com.sf.kyc.vas.model.VoiceBundle vb = new com.sf.kyc.vas.model.VoiceBundle();
+                vb.setErcProductCategory(voiceBundle.getErcProductCategory());
+                vb.setPretupsValue(voiceBundle.getPretupsValue());
+                vb.setProductName(voiceBundle.getProductName());
+                vb.setProductValue(voiceBundle.getProductValue());
+                vb.setVersionCount(voiceBundle.getVersionCount());
+                voiceBundles.add(vb);
+            }
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+        }
+        voiceBundleList.setVoicebundles(voiceBundles);
+        return voiceBundleList;
     }
 
 }

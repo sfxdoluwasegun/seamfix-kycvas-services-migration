@@ -46,7 +46,7 @@ public class WsSpringConfig {
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(appDataSource());
-        sessionFactory.setPackagesToScan(new String[]{"com.sf.kyc.vas.entity", "com.sf.biocapture.entity"});
+        sessionFactory.setPackagesToScan(new String[]{"com.sf.kyc.vas.entity"});
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
     }
@@ -55,10 +55,10 @@ public class WsSpringConfig {
     public DataSource appDataSource() {
         try {
             ComboPooledDataSource ds = new ComboPooledDataSource();
-            ds.setDriverClass(env.getRequiredProperty("jdbc.driverClassName"));
+            ds.setDriverClass(env.getRequiredProperty("jdbc.driver"));
             ds.setJdbcUrl(env.getRequiredProperty("jdbc.url"));
-            ds.setUser(env.getRequiredProperty("jdbc.user"));
-            ds.setPassword(env.getRequiredProperty("jdbc.pass"));
+            ds.setUser(env.getRequiredProperty("jdbc.username"));
+            ds.setPassword(env.getRequiredProperty("jdbc.password"));
             ds.setMaxPoolSize(Integer.parseInt(env.getProperty("c3p0.maxPoolSize")));
             ds.setMinPoolSize(Integer.parseInt(env.getProperty("c3p0.minPoolSize")));
             ds.setAcquireIncrement(Integer.parseInt(env.getProperty("c3p0.acquireIncrement")));
@@ -70,7 +70,7 @@ public class WsSpringConfig {
             ds.setMaxIdleTimeExcessConnections(Integer.parseInt(env.getProperty("c3p0.maxIdleTimeExcessConnections")));
             ds.setIdleConnectionTestPeriod(Integer.parseInt(env.getProperty("c3p0.idleConnectionTestPeriod")));
             ds.setTestConnectionOnCheckout(true);
-            ds.setPreferredTestQuery("SELECT 1");
+            ds.setPreferredTestQuery(env.getProperty("c3p0.preferredTestQuery"));
             ds.setDebugUnreturnedConnectionStackTraces(true);
             ds.setAutoCommitOnClose(true);
             return ds;
@@ -101,7 +101,7 @@ public class WsSpringConfig {
                 setProperty("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
                 setProperty("hibernate.auto_close_session", env.getProperty("hibernate.auto_close_session"));
                 setProperty("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
-                setProperty("hibernate.default_schema", env.getProperty("hibernate.default_schema"));
+               // setProperty("hibernate.default_schema", env.getProperty("hibernate.default_schema"));
                 setProperty("org.hibernate.envers.do_not_audit_optimistic_locking_field", env.getProperty("org.hibernate.envers.do_not_audit_optimistic_locking_field"));
                 setProperty("org.hibernate.envers.store_data_at_delete", env.getProperty("org.hibernate.envers.store_data_at_delete"));
                 setProperty("org.hibernate.envers.audit_table_prefix", env.getProperty("org.hibernate.envers.audit_table_prefix"));
