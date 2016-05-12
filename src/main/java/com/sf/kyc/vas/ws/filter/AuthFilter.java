@@ -1,12 +1,10 @@
 package com.sf.kyc.vas.ws.filter;
 
-import com.sf.kyc.vas.dao.VtuUserDao;
-import com.sf.kyc.vas.entity.VtuUser;
+import com.sf.kyc.vas.dao.DataBundleDao;
 import com.sf.kyc.vas.util.RSAServiceUtil;
 import static com.sf.kyc.vas.util.VConstant.REQUEST_TIME;
 import static com.sf.kyc.vas.util.VConstant.SIGNATURE;
 import static com.sf.kyc.vas.util.VConstant.USERNAME;
-import com.sf.kyc.vas.util.Utilities;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class AuthFilter implements ContainerRequestFilter {
 
     @Inject
-    public VtuUserDao vtuUserDao;
+    public DataBundleDao vtuUserDao;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -40,9 +38,9 @@ public class AuthFilter implements ContainerRequestFilter {
         UriInfo uriInfo = requestContext.getUriInfo();
         String path = uriInfo.getPath();
         log.info("UriInfo Path: " + path);
-        if (path.startsWith("services/api/v1/")) {
-            serviceAuthentication(requestContext);
-        }
+//        if (path.startsWith("services/api/v1/")) {
+//            serviceAuthentication(requestContext);
+//        }
 
     }
 
@@ -81,22 +79,22 @@ public class AuthFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
 
-            VtuUser vtuUser = vtuUserDao.getVtuUserByEmail(username);
-            if (vtuUser == null) {
-                log.info("Unidentifable user/device request");
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
-            if (vtuUser.getVasClientId() == null) {
-                log.info("No valid client ID found for this client request");
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
-            String calculatedSignature = Utilities.requestSignature(requestTime, vtuUser.getVasClientId(), username);
-            if (!calculatedSignature.equals(requestSignature)) {
-                log.info("Invalid signature");
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
+//            TariffPlan vtuUser = vtuUserDao.getVtuUserByEmail(username);
+//            if (vtuUser == null) {
+//                log.info("Unidentifable user/device request");
+//                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+//            }
+//            if (vtuUser.getVasClientId() == null) {
+//                log.info("No valid client ID found for this client request");
+//                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+//            }
+//            String calculatedSignature = Utilities.requestSignature(requestTime, vtuUser.getVasClientId(), username);
+//            if (!calculatedSignature.equals(requestSignature)) {
+//                log.info("Invalid signature");
+//                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+//            }
             log.info("Application request signature verified ");
-            requestContext.setProperty("encryptedVasClientId", rsu.encrypt(vtuUser.getVasClientId()));
+           // requestContext.setProperty("encryptedVasClientId", rsu.encrypt(vtuUser.getVasClientId()));
 
         } catch (Exception ex) {
             Logger.getLogger(AuthFilter.class.getName()).log(Level.SEVERE, null, ex);

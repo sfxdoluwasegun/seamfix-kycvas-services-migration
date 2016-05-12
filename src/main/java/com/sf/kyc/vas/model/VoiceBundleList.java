@@ -6,6 +6,7 @@
 package com.sf.kyc.vas.model;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -15,19 +16,19 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author UCHECHUKWU
  */
-@XmlRootElement(name = "VasIdRequest")
+@XmlRootElement(name = "VoiceBundleList")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class VasIdRequest implements Serializable {
+public class VoiceBundleList implements Serializable {
 
-    @XmlElement()
-    private String email;
+    @XmlElement(name = "voicebundles")
+    private List<VoiceBundle> voicebundles;
 
-    public String getEmail() {
-        return email;
+    public List<VoiceBundle> getVoicebundles() {
+        return voicebundles;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setVoicebundles(List<VoiceBundle> voicebundles) {
+        this.voicebundles = voicebundles;
     }
 
 }

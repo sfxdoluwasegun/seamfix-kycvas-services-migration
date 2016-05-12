@@ -5,20 +5,22 @@
  */
 package com.sf.kyc.vas.dao;
 
-import javax.sql.DataSource;
+import com.sf.kyc.vas.entity.DataBundle;
+import javax.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 
 /**
  *
  * @author UCHECHUKWU
  */
-@SuppressWarnings("unchecked")
 @Log4j
 @Repository
-public abstract class AbstractSpringJdbcTemplateBaseDao {
-  protected JdbcTemplate jdbcTemplate;
-    public abstract void setDataSource(DataSource datasource);
+public class DataBundleDao extends AbstractSpringHibernateBaseDao<DataBundle> {
+
+    @PostConstruct
+    public void init() {
+        super.setClazz(DataBundle.class);
+    }
+
 }

@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="AirService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://tempuri.org/" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://tempuri.org/Imports">
+            <xsd:import schemaLocation="http://172.24.35.96:2015/Air.svc?xsd=xsd0" namespace="http://tempuri.org/"/>
+            <xsd:import schemaLocation="http://172.24.35.96:2015/Air.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/"/>
+            <xsd:import schemaLocation="http://172.24.35.96:2015/Air.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Provisioning.Models"/>
+            <xsd:import schemaLocation="http://172.24.35.96:2015/Air.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+            <xsd:import schemaLocation="http://172.24.35.96:2015/Air.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/Provisioning.Models.Ucip"/>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="IAirService_AdjustBalance_InputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustBalance"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_AdjustBalance_OutputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustBalanceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccountDetails_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccountDetails"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccountDetails_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccountDetailsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccumulatorDetails_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccumulatorDetails"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccumulatorDetails_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccumulatorDetailsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetServiceClass_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetServiceClass"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetServiceClass_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetServiceClassResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccumulators_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccumulators"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetAccumulators_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetAccumulatorsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetBalanceInfo_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetBalanceInfo"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetBalanceInfo_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetBalanceInfoResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetBalanceAndDate_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetBalanceAndDate"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetBalanceAndDate_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetBalanceAndDateResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetFaFList_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetFaFList"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_GetFaFList_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetFaFListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation1_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation1"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation1_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation1Response"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation2_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation2"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation2_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation2Response"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation3_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation3"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_UpdateSubscriberSegmentation3_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateSubscriberSegmentation3Response"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_AdjustDedicatedAccount_InputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustDedicatedAccount"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_AdjustDedicatedAccount_OutputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustDedicatedAccountResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_SetDedicatedAccount_InputMessage">
+        <wsdl:part name="parameters" element="tns:SetDedicatedAccount"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_SetDedicatedAccount_OutputMessage">
+        <wsdl:part name="parameters" element="tns:SetDedicatedAccountResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_FixDedicatedAccount_InputMessage">
+        <wsdl:part name="parameters" element="tns:FixDedicatedAccount"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_FixDedicatedAccount_OutputMessage">
+        <wsdl:part name="parameters" element="tns:FixDedicatedAccountResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_FixDedicatedAccountAAPCN_InputMessage">
+        <wsdl:part name="parameters" element="tns:FixDedicatedAccountAAPCN"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_FixDedicatedAccountAAPCN_OutputMessage">
+        <wsdl:part name="parameters" element="tns:FixDedicatedAccountAAPCNResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_AdjustDedicatedAccountWithFixedDate_InputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustDedicatedAccountWithFixedDate"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_AdjustDedicatedAccountWithFixedDate_OutputMessage">
+        <wsdl:part name="parameters" element="tns:AdjustDedicatedAccountWithFixedDateResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_ChangeServiceClass_InputMessage">
+        <wsdl:part name="parameters" element="tns:ChangeServiceClass"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_ChangeServiceClass_OutputMessage">
+        <wsdl:part name="parameters" element="tns:ChangeServiceClassResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_Refill_InputMessage">
+        <wsdl:part name="parameters" element="tns:Refill"/>
+    </wsdl:message>
+    <wsdl:message name="IAirService_Refill_OutputMessage">
+        <wsdl:part name="parameters" element="tns:RefillResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="IAirService">
+        <wsdl:operation name="AdjustBalance">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/AdjustBalance" message="tns:IAirService_AdjustBalance_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/AdjustBalanceResponse" message="tns:IAirService_AdjustBalance_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccountDetails">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetAccountDetails" message="tns:IAirService_GetAccountDetails_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetAccountDetailsResponse" message="tns:IAirService_GetAccountDetails_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccumulatorDetails">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetAccumulatorDetails" message="tns:IAirService_GetAccumulatorDetails_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetAccumulatorDetailsResponse" message="tns:IAirService_GetAccumulatorDetails_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetServiceClass">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetServiceClass" message="tns:IAirService_GetServiceClass_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetServiceClassResponse" message="tns:IAirService_GetServiceClass_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccumulators">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetAccumulators" message="tns:IAirService_GetAccumulators_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetAccumulatorsResponse" message="tns:IAirService_GetAccumulators_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetBalanceInfo">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetBalanceInfo" message="tns:IAirService_GetBalanceInfo_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetBalanceInfoResponse" message="tns:IAirService_GetBalanceInfo_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetBalanceAndDate">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetBalanceAndDate" message="tns:IAirService_GetBalanceAndDate_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetBalanceAndDateResponse" message="tns:IAirService_GetBalanceAndDate_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="GetFaFList">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/GetFaFList" message="tns:IAirService_GetFaFList_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/GetFaFListResponse" message="tns:IAirService_GetFaFList_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation1">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation1" message="tns:IAirService_UpdateSubscriberSegmentation1_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation1Response" message="tns:IAirService_UpdateSubscriberSegmentation1_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation2">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation2" message="tns:IAirService_UpdateSubscriberSegmentation2_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation2Response" message="tns:IAirService_UpdateSubscriberSegmentation2_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation3">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation3" message="tns:IAirService_UpdateSubscriberSegmentation3_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/UpdateSubscriberSegmentation3Response" message="tns:IAirService_UpdateSubscriberSegmentation3_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="AdjustDedicatedAccount">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/AdjustDedicatedAccount" message="tns:IAirService_AdjustDedicatedAccount_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/AdjustDedicatedAccountResponse" message="tns:IAirService_AdjustDedicatedAccount_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="SetDedicatedAccount">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/SetDedicatedAccount" message="tns:IAirService_SetDedicatedAccount_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/SetDedicatedAccountResponse" message="tns:IAirService_SetDedicatedAccount_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="FixDedicatedAccount">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/FixDedicatedAccount" message="tns:IAirService_FixDedicatedAccount_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/FixDedicatedAccountResponse" message="tns:IAirService_FixDedicatedAccount_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="FixDedicatedAccountAAPCN">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/FixDedicatedAccountAAPCN" message="tns:IAirService_FixDedicatedAccountAAPCN_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/FixDedicatedAccountAAPCNResponse" message="tns:IAirService_FixDedicatedAccountAAPCN_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="AdjustDedicatedAccountWithFixedDate">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/AdjustDedicatedAccountWithFixedDate" message="tns:IAirService_AdjustDedicatedAccountWithFixedDate_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/AdjustDedicatedAccountWithFixedDateResponse" message="tns:IAirService_AdjustDedicatedAccountWithFixedDate_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="ChangeServiceClass">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/ChangeServiceClass" message="tns:IAirService_ChangeServiceClass_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/ChangeServiceClassResponse" message="tns:IAirService_ChangeServiceClass_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="Refill">
+            <wsdl:input wsaw:Action="http://tempuri.org/IAirService/Refill" message="tns:IAirService_Refill_InputMessage"/>
+            <wsdl:output wsaw:Action="http://tempuri.org/IAirService/RefillResponse" message="tns:IAirService_Refill_OutputMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="BasicHttpBinding_IAirService" type="tns:IAirService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="AdjustBalance">
+            <soap:operation soapAction="http://tempuri.org/IAirService/AdjustBalance" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccountDetails">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetAccountDetails" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccumulatorDetails">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetAccumulatorDetails" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetServiceClass">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetServiceClass" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetAccumulators">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetAccumulators" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetBalanceInfo">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetBalanceInfo" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetBalanceAndDate">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetBalanceAndDate" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetFaFList">
+            <soap:operation soapAction="http://tempuri.org/IAirService/GetFaFList" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation1">
+            <soap:operation soapAction="http://tempuri.org/IAirService/UpdateSubscriberSegmentation1" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation2">
+            <soap:operation soapAction="http://tempuri.org/IAirService/UpdateSubscriberSegmentation2" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateSubscriberSegmentation3">
+            <soap:operation soapAction="http://tempuri.org/IAirService/UpdateSubscriberSegmentation3" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="AdjustDedicatedAccount">
+            <soap:operation soapAction="http://tempuri.org/IAirService/AdjustDedicatedAccount" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="SetDedicatedAccount">
+            <soap:operation soapAction="http://tempuri.org/IAirService/SetDedicatedAccount" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="FixDedicatedAccount">
+            <soap:operation soapAction="http://tempuri.org/IAirService/FixDedicatedAccount" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="FixDedicatedAccountAAPCN">
+            <soap:operation soapAction="http://tempuri.org/IAirService/FixDedicatedAccountAAPCN" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="AdjustDedicatedAccountWithFixedDate">
+            <soap:operation soapAction="http://tempuri.org/IAirService/AdjustDedicatedAccountWithFixedDate" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="ChangeServiceClass">
+            <soap:operation soapAction="http://tempuri.org/IAirService/ChangeServiceClass" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Refill">
+            <soap:operation soapAction="http://tempuri.org/IAirService/Refill" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="AirService">
+        <wsdl:port name="BasicHttpBinding_IAirService" binding="tns:BasicHttpBinding_IAirService">
+            <soap:address location="http://172.24.35.96:2015/Air.svc"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

@@ -5,7 +5,7 @@
  */
 package com.sf.kyc.vas.dao;
 
-import com.sf.kyc.vas.entity.TransactionHistory;
+import com.sf.kyc.vas.entity.TariffPlan;
 import javax.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Repository;
@@ -16,11 +16,11 @@ import org.springframework.stereotype.Repository;
  */
 @Log4j
 @Repository
-public class TransactionHistoryDao extends AbstractSpringHibernateBaseDao<TransactionHistory> {
+public class TariffPlanDao extends AbstractSpringHibernateBaseDao<TariffPlan> {
 
     @PostConstruct
     public void init() {
-        super.setClazz(TransactionHistory.class);
+        super.setClazz(TariffPlan.class);
     }
 
 }
