@@ -7,9 +7,11 @@ package com.sf.kyc.vas.service;
 
 import com.sf.kyc.vas.dao.VasTransactionLogDao;
 import com.sf.kyc.vas.dao.DataBundleDao;
+import com.sf.kyc.vas.dao.SmsShortServiceCodeDao;
 import com.sf.kyc.vas.dao.TariffPlanDao;
 import com.sf.kyc.vas.dao.VoiceBundleDao;
 import com.sf.kyc.vas.entity.DataBundle;
+import com.sf.kyc.vas.entity.SmsShortServiceCode;
 import com.sf.kyc.vas.entity.TariffPlan;
 import com.sf.kyc.vas.entity.VasTransactionLog;
 import com.sf.kyc.vas.entity.VoiceBundle;
@@ -19,6 +21,7 @@ import com.sf.kyc.vas.enums.RequestInterface;
 import com.sf.kyc.vas.enums.RequestStatus;
 import com.sf.kyc.vas.model.DataBundleList;
 import com.sf.kyc.vas.model.GenericResponse;
+import com.sf.kyc.vas.model.SmsShortServiceCodeList;
 import com.sf.kyc.vas.model.TariffPlanChangeRequest;
 import com.sf.kyc.vas.model.TariffPlanList;
 import com.sf.kyc.vas.model.VasLogRequest;
@@ -53,6 +56,9 @@ public class VasService {
 
     @Inject
     DataBundleDao dataBundleDao;
+
+    @Inject
+    SmsShortServiceCodeDao smsShortServiceCodeDao;
     @Inject
     TariffPlanDao tariffPlanDao;
     @Inject
@@ -71,6 +77,7 @@ public class VasService {
             if (done) {
                 resp.setResponseCode("00");
                 resp.setResponseDescription("Customer tariff plan change successful");
+                logVasrequest(tariffPlanChangeRequest);
             } else {
                 resp.setResponseCode("06");
                 resp.setResponseDescription("A Gateway service error occurred.");
@@ -82,6 +89,7 @@ public class VasService {
             log.error(ex.getMessage());
             resp.setResponseCode("02");
             resp.setResponseDescription("A KYC service error occurred");
+        } finally {
         }
         return resp;
     }
@@ -148,7 +156,7 @@ public class VasService {
                 vasLog.setClientVasRequestChannelType(ClientRequestChannelType.WINDOWS);
             }
             vasLog.setCustomerMsisdn(tariffPlanChangeRequest.getCustomerMsisdn());
-            vasLog.setDeviceMacAddress("Tariff Plan Changr");
+            vasLog.setDeviceMacAddress("Tariff Plan Change");
             vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));
@@ -161,8 +169,10 @@ public class VasService {
             vasLog.setSenderId(tariffPlanChangeRequest.getSenderId());
             vasLog.setVasRequestReference(tariffPlanChangeRequest.getReference());
             vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+
             vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
+            resp = true;
 
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
@@ -192,6 +202,27 @@ public class VasService {
         }
         tariffPlanList.setTariffplans(tariffPlans);
         return tariffPlanList;
+    }
+
+    @Transactional
+    public SmsShortServiceCodeList getSmsShortServiceCodes() {
+        SmsShortServiceCodeList smsShortServiceCodeList = new SmsShortServiceCodeList();
+        List<com.sf.kyc.vas.model.SmsShortServiceCode> smsShortServiceCodes = new ArrayList<>();
+        try {
+            for (SmsShortServiceCode smsShortServiceCode : smsShortServiceCodeDao.findAll()) {
+                com.sf.kyc.vas.model.SmsShortServiceCode shsc = new com.sf.kyc.vas.model.SmsShortServiceCode();
+                shsc.setName(smsShortServiceCode.getName());
+                shsc.setCode(smsShortServiceCode.getCode());
+                shsc.setVersionCount(smsShortServiceCode.getVersionCount());
+                smsShortServiceCodes.add(shsc);
+            }
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+            log.error(ex.getMessage());
+        }
+        smsShortServiceCodeList.setSmsShortServiceCodes(smsShortServiceCodes);
+        return smsShortServiceCodeList;
     }
 
     @Transactional

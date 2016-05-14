@@ -7,6 +7,7 @@ package com.sf.kyc.vas.ws.rest;
 
 import com.sf.kyc.vas.model.DataBundleList;
 import com.sf.kyc.vas.model.GenericResponse;
+import com.sf.kyc.vas.model.SmsShortServiceCodeList;
 import com.sf.kyc.vas.model.TariffPlanChangeRequest;
 import com.sf.kyc.vas.model.TariffPlanList;
 import com.sf.kyc.vas.model.VasLogRequest;
@@ -54,6 +55,25 @@ public class BaseEndPoint {
             log.error(message);
         }
         return plans;
+    }
+
+    @GET
+    @Path("/shortcodes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public SmsShortServiceCodeList getShortcodes(@Context HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        SmsShortServiceCodeList shortCodes = new SmsShortServiceCodeList();
+        if (ipAddress == null) {
+            ipAddress = request.getRemoteAddr();
+        }
+        log.info("User IP Address" + ipAddress);
+        try {
+            shortCodes = vasService.getSmsShortServiceCodes();
+        } catch (Exception ex) {
+            String message = Utilities.getStackTrace(ex);
+            log.error(message);
+        }
+        return shortCodes;
     }
 
     @GET
