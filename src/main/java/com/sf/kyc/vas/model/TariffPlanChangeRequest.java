@@ -5,6 +5,7 @@
  */
 package com.sf.kyc.vas.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -20,18 +21,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class TariffPlanChangeRequest implements Serializable {
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private int serviceClass;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String customerMsisdn;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String deviceTag;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String deviceMacAddress;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String senderId;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String reference;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String clientVasRequestChannelType;
 
     public int getServiceClass() {

@@ -41,7 +41,7 @@ public class WebAppInitializer implements WebApplicationInitializer {
         //add jersey servlet to the container(i.e. servlet context)   
         final ServletRegistration.Dynamic jerseyServlet = container.addServlet("myJerseyServlet", servlet);
         jerseyServlet.addMapping("/rest/*");
-        jerseyServlet.setAsyncSupported(true);
+        //jerseyServlet.setAsyncSupported(true);
         //add jersey resources to the jersey servlet   
         jerseyServlet.setInitParameter("javax.ws.rs.Application",
                 "com.sf.kyc.vas.ws.config.AppConfigResource");

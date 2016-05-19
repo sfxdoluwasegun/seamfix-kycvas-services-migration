@@ -126,10 +126,9 @@ public class BaseEndPoint {
 
     @POST
     @Path("/tariffswap")
-    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public void tariffSwap(TariffPlanChangeRequest tariffPlanChangeRequest, @Context HttpServletRequest request, final @Suspended AsyncResponse response) {
+    public GenericResponse tariffSwap(TariffPlanChangeRequest tariffPlanChangeRequest, @Context HttpServletRequest request) {
         GenericResponse resp = new GenericResponse();
         log.info("User Tariff plan change request");
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
@@ -138,24 +137,32 @@ public class BaseEndPoint {
         }
         log.info("User IP Address" + ipAddress);
         resp = vasService.changeTariffPlan(tariffPlanChangeRequest);
-        response.resume(resp);
+
+        return resp;
     }
 
     @POST
     @Path("/logvasrequest")
-    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public void logVasRequest(VasLogRequest vasLogRequest, @Context HttpServletRequest request, final @Suspended AsyncResponse response) {
+    public GenericResponse logVasRequest(VasLogRequest vasLogRequest, @Context HttpServletRequest request) {
         GenericResponse resp = new GenericResponse();
+        boolean logged = false;
         log.info("Logging user's vas request");
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null) {
             ipAddress = request.getRemoteAddr();
         }
-        resp = vasService.logVasrequest(vasLogRequest);
-        response.resume(resp);
+        logged = vasService.logVasrequest(vasLogRequest);
+        if (logged) {
+            resp.setResponseCode("00");
+            resp.setResponseDescription("Transaction log was successful");
+        } else {
+            resp.setResponseCode("06");
+            resp.setResponseDescription("Error processing request");
+        }
         log.info("User IP Address" + ipAddress);
+        return resp;
 
     }
 
