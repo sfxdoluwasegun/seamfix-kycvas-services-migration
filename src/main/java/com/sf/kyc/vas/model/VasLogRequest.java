@@ -5,6 +5,7 @@
  */
 package com.sf.kyc.vas.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -21,44 +22,58 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class VasLogRequest implements Serializable {
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private double amount;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String narration;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String deviceMacAddress;
+    @JsonProperty(required = true)
     @XmlElement(required = true)
     private String deviceTag;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String senderId;
-    @XmlElement(required = false)
+    @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String productCode;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String productName;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private Date requestDate;
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String vasRequestStatus;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String vasRequestCategory;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String clientVasRequestChannelType;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String requestInterface;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String vasRequestReference;
 
-    @XmlElement(required = false)
+    @JsonProperty(required = true)
     private String responseReference;
 
     @XmlElement(required = false)
     private String requestXml;
 
     @XmlElement(required = true)
+    @JsonProperty(required = true)
     private String customerMsisdn;
 
     @XmlElement(required = false)

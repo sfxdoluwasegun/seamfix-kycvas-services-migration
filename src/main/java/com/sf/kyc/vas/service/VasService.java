@@ -75,9 +75,9 @@ public class VasService {
             IAirService service = soapTemplate.getAirtelServiceViaWsdlUrl(airtelWsdlUrl);
             done = service.changeServiceClass(tariffPlanChangeRequest.getCustomerMsisdn(), tariffPlanChangeRequest.getServiceClass(), kycClientIdentifier);
             if (done) {
+                logVasrequest(tariffPlanChangeRequest);
                 resp.setResponseCode("00");
                 resp.setResponseDescription("Customer tariff plan change successful");
-                logVasrequest(tariffPlanChangeRequest);
             } else {
                 resp.setResponseCode("06");
                 resp.setResponseDescription("A Gateway service error occurred.");
@@ -89,16 +89,20 @@ public class VasService {
             log.error(ex.getMessage());
             resp.setResponseCode("02");
             resp.setResponseDescription("A KYC service error occurred");
-        } finally {
         }
         return resp;
     }
 
     @Transactional
-    public GenericResponse logVasrequest(VasLogRequest vasLogRequest) {
-        GenericResponse resp = new GenericResponse();
+    public boolean logVasrequest(VasLogRequest vasLogRequest) {
+        boolean resp = false;
         try {
+
             VasTransactionLog vasLog = new VasTransactionLog();
+            VasTransactionLog dbVasLog = vasTransactionLogDao.findByClientRef(vasLogRequest.getVasRequestReference());
+            if (dbVasLog != null) {
+                vasLog = dbVasLog;
+            }
             vasLog.setAmount(new BigDecimal(vasLogRequest.getAmount()));
             vasLog.setClientVasRequestChannelType(ClientRequestChannelType.ANDROID);
             if (vasLogRequest.getClientVasRequestChannelType().equalsIgnoreCase("WINDOWS")) {
@@ -106,7 +110,7 @@ public class VasService {
             }
             vasLog.setCustomerMsisdn(vasLogRequest.getCustomerMsisdn());
             vasLog.setDeviceMacAddress(vasLogRequest.getDeviceMacAddress());
-             vasLog.setDeviceTag(vasLogRequest.getDeviceTag());
+            vasLog.setDeviceTag(vasLogRequest.getDeviceTag());
             vasLog.setNarration(vasLogRequest.getNarration());
             vasLog.setProductCode(vasLogRequest.getProductCode());
             vasLog.setProductName(vasLogRequest.getProductName());
@@ -135,13 +139,13 @@ public class VasService {
             } else if (vasLogRequest.getVasRequestCategory().equalsIgnoreCase("VOICE_BUNDLE_SWITCH")) {
                 vasLog.setVasRequestCategory(RequestCategory.VOICE_BUNDLE_SWITCH);
             }
-
+            vasTransactionLogDao.save(vasLog);
+            resp = true;
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
             log.error(ex.getMessage());
-            resp.setResponseCode("02");
-            resp.setResponseDescription("A KYC service error occurred");
+            resp = false;
         }
         return resp;
     }
@@ -151,35 +155,40 @@ public class VasService {
         boolean resp = false;
         try {
             VasTransactionLog vasLog = new VasTransactionLog();
+            VasTransactionLog dbVasLog = vasTransactionLogDao.findByClientRef(tariffPlanChangeRequest.getReference());
+            if (dbVasLog != null) {
+                vasLog = dbVasLog;
+            }
             vasLog.setAmount(BigDecimal.ZERO);
             vasLog.setClientVasRequestChannelType(ClientRequestChannelType.ANDROID);
             if (tariffPlanChangeRequest.getClientVasRequestChannelType().equalsIgnoreCase("WINDOWS")) {
                 vasLog.setClientVasRequestChannelType(ClientRequestChannelType.WINDOWS);
             }
             vasLog.setCustomerMsisdn(tariffPlanChangeRequest.getCustomerMsisdn());
-            vasLog.setDeviceMacAddress("Tariff Plan Change");
-             vasLog.setDeviceTag(tariffPlanChangeRequest.getDeviceTag());
+            vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
+            vasLog.setDeviceTag(tariffPlanChangeRequest.getDeviceTag());
             vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));
             vasLog.setRequestInterface(RequestInterface.API);
-
             vasLog.setRequestXml("");
+            vasLog.setNarration("Tariff Plan change for " + tariffPlanChangeRequest.getCustomerMsisdn());
             vasLog.setResponseCode("");
             vasLog.setResponseReference("");
             vasLog.setResponseXml("");
             vasLog.setSenderId(tariffPlanChangeRequest.getSenderId());
             vasLog.setVasRequestReference(tariffPlanChangeRequest.getReference());
             vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
-
             vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
+            vasTransactionLogDao.save(vasLog);
             resp = true;
 
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
             log.error(ex.getMessage());
+            resp = false;
 
         }
         return resp;

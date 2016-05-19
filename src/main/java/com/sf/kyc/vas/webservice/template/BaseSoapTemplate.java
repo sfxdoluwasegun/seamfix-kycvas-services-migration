@@ -7,8 +7,11 @@ package com.sf.kyc.vas.webservice.template;
 
 import com.sf.kyc.vas.soap.webservice.artifact.AirService;
 import com.sf.kyc.vas.soap.webservice.artifact.IAirService;
+import com.sf.kyc.vas.util.SoapServiceLogHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
 import lombok.extern.log4j.Log4j;
 
 /**
@@ -32,6 +35,10 @@ public class BaseSoapTemplate {
         }
         AirService service = new AirService(url);
         iAirService = service.getBasicHttpBindingIAirService();
+        BindingProvider bp = (BindingProvider) iAirService;
+        java.util.List<Handler> handlers = bp.getBinding().getHandlerChain();
+        handlers.add(new SoapServiceLogHandler());
+        bp.getBinding().setHandlerChain(handlers);
         return iAirService;
 
     }
