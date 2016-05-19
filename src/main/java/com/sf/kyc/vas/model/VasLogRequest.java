@@ -27,6 +27,8 @@ public class VasLogRequest implements Serializable {
     @XmlElement(required = true)
     private String deviceMacAddress;
     @XmlElement(required = true)
+    private String deviceTag;
+    @XmlElement(required = true)
     private String senderId;
     @XmlElement(required = false)
     private String productCode;
@@ -188,6 +190,14 @@ public class VasLogRequest implements Serializable {
 
     public void setResponseXml(String responseXml) {
         this.responseXml = responseXml;
+    }
+
+    public String getDeviceTag() {
+        return deviceTag;
+    }
+
+    public void setDeviceTag(String deviceTag) {
+        this.deviceTag = deviceTag;
     }
 
 }

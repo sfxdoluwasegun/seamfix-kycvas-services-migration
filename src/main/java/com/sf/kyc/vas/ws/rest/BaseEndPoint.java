@@ -22,10 +22,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.log4j.Log4j;
+import org.glassfish.jersey.server.ManagedAsync;
 
 /**
  *
@@ -40,8 +42,9 @@ public class BaseEndPoint {
 
     @GET
     @Path("/tariffplans")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
-    public TariffPlanList getTariffPlans(@Context HttpServletRequest request) {
+    public void getTariffPlans(@Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         TariffPlanList plans = new TariffPlanList();
         if (ipAddress == null) {
@@ -50,17 +53,19 @@ public class BaseEndPoint {
         log.info("User IP Address" + ipAddress);
         try {
             plans = vasService.getTariffPlans();
+            response.resume(plans);
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
         }
-        return plans;
+
     }
 
     @GET
     @Path("/shortcodes")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
-    public SmsShortServiceCodeList getShortcodes(@Context HttpServletRequest request) {
+    public SmsShortServiceCodeList getShortcodes(@Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         SmsShortServiceCodeList shortCodes = new SmsShortServiceCodeList();
         if (ipAddress == null) {
@@ -69,6 +74,7 @@ public class BaseEndPoint {
         log.info("User IP Address" + ipAddress);
         try {
             shortCodes = vasService.getSmsShortServiceCodes();
+            response.resume(shortCodes);
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
@@ -78,8 +84,9 @@ public class BaseEndPoint {
 
     @GET
     @Path("/databundles")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
-    public DataBundleList getDataBundles(@Context HttpServletRequest request) {
+    public DataBundleList getDataBundles(@Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         DataBundleList bundles = new DataBundleList();
         if (ipAddress == null) {
@@ -88,6 +95,7 @@ public class BaseEndPoint {
         log.info("User IP Address" + ipAddress);
         try {
             bundles = vasService.getDataBundles();
+            response.resume(bundles);
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
@@ -97,8 +105,9 @@ public class BaseEndPoint {
 
     @GET
     @Path("/voicebundles")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
-    public VoiceBundleList getVoiceBundleList(@Context HttpServletRequest request) {
+    public void getVoiceBundleList(@Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         VoiceBundleList bundles = new VoiceBundleList();
         if (ipAddress == null) {
@@ -107,18 +116,20 @@ public class BaseEndPoint {
         log.info("User IP Address" + ipAddress);
         try {
             bundles = vasService.getVoiceBundles();
+            response.resume(bundles);
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
         }
-        return bundles;
+
     }
 
     @POST
     @Path("/tariffswap")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public GenericResponse tariffSwap(TariffPlanChangeRequest tariffPlanChangeRequest, @Context ContainerRequestContext containerRequestContext, @Context HttpServletRequest request) {
+    public void tariffSwap(TariffPlanChangeRequest tariffPlanChangeRequest, @Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         GenericResponse resp = new GenericResponse();
         log.info("User Tariff plan change request");
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
@@ -127,14 +138,15 @@ public class BaseEndPoint {
         }
         log.info("User IP Address" + ipAddress);
         resp = vasService.changeTariffPlan(tariffPlanChangeRequest);
-        return resp;
+        response.resume(resp);
     }
 
     @POST
     @Path("/logvasrequest")
+    @ManagedAsync
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public GenericResponse logVasRequest(VasLogRequest vasLogRequest, @Context ContainerRequestContext containerRequestContext, @Context HttpServletRequest request) {
+    public void logVasRequest(VasLogRequest vasLogRequest, @Context HttpServletRequest request, final @Suspended AsyncResponse response) {
         GenericResponse resp = new GenericResponse();
         log.info("Logging user's vas request");
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
@@ -142,9 +154,9 @@ public class BaseEndPoint {
             ipAddress = request.getRemoteAddr();
         }
         resp = vasService.logVasrequest(vasLogRequest);
+        response.resume(resp);
         log.info("User IP Address" + ipAddress);
 
-        return resp;
     }
 
 }

@@ -106,6 +106,7 @@ public class VasService {
             }
             vasLog.setCustomerMsisdn(vasLogRequest.getCustomerMsisdn());
             vasLog.setDeviceMacAddress(vasLogRequest.getDeviceMacAddress());
+             vasLog.setDeviceTag(vasLogRequest.getDeviceTag());
             vasLog.setNarration(vasLogRequest.getNarration());
             vasLog.setProductCode(vasLogRequest.getProductCode());
             vasLog.setProductName(vasLogRequest.getProductName());
@@ -157,6 +158,7 @@ public class VasService {
             }
             vasLog.setCustomerMsisdn(tariffPlanChangeRequest.getCustomerMsisdn());
             vasLog.setDeviceMacAddress("Tariff Plan Change");
+             vasLog.setDeviceTag(tariffPlanChangeRequest.getDeviceTag());
             vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));

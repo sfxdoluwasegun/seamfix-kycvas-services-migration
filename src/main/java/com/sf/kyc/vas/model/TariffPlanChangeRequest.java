@@ -24,6 +24,8 @@ public class TariffPlanChangeRequest implements Serializable {
     @XmlElement(required = true)
     private String customerMsisdn;
     @XmlElement(required = true)
+    private String deviceTag;
+    @XmlElement(required = true)
     private String deviceMacAddress;
     @XmlElement(required = true)
     private String senderId;
@@ -78,6 +80,14 @@ public class TariffPlanChangeRequest implements Serializable {
 
     public void setClientVasRequestChannelType(String clientVasRequestChannelType) {
         this.clientVasRequestChannelType = clientVasRequestChannelType;
+    }
+
+    public String getDeviceTag() {
+        return deviceTag;
+    }
+
+    public void setDeviceTag(String deviceTag) {
+        this.deviceTag = deviceTag;
     }
 
 }
