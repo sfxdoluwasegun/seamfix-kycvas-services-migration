@@ -168,7 +168,14 @@ public class VasService {
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
             vasLog.setDeviceTag(tariffPlanChangeRequest.getDeviceTag());
             vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
-            vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            TariffPlan tp = tariffPlanDao.findTariffPlanByServiceClass(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            if (tp != null) {
+                  vasLog.setProductName(tp.getPlanName());
+            } else {
+                 vasLog.setProductName("Others");
+            }
+
+          
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));
             vasLog.setRequestInterface(RequestInterface.API);
             vasLog.setRequestXml("");
