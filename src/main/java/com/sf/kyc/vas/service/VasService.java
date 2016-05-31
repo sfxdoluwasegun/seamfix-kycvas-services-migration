@@ -75,16 +75,18 @@ public class VasService {
             IAirService service = soapTemplate.getAirtelServiceViaWsdlUrl(airtelWsdlUrl);
             done = service.changeServiceClass(tariffPlanChangeRequest.getCustomerMsisdn(), tariffPlanChangeRequest.getServiceClass(), kycClientIdentifier);
             if (done) {
-                logVasrequest(tariffPlanChangeRequest);
+                logVasrequest(tariffPlanChangeRequest, true);
                 resp.setResponseCode("00");
                 resp.setResponseDescription("Customer tariff plan change successful");
             } else {
+                logVasrequest(tariffPlanChangeRequest, false);
                 resp.setResponseCode("06");
                 resp.setResponseDescription("A Gateway service error occurred.");
             }
 
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
+            logVasrequest(tariffPlanChangeRequest, false);
             log.error(message);
             log.error(ex.getMessage());
             resp.setResponseCode("02");
@@ -151,7 +153,7 @@ public class VasService {
     }
 
     @Transactional
-    public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest) {
+    public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest, boolean status) {
         boolean resp = false;
         try {
             VasTransactionLog vasLog = new VasTransactionLog();
@@ -168,7 +170,13 @@ public class VasService {
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
             vasLog.setDeviceTag(tariffPlanChangeRequest.getDeviceTag());
             vasLog.setProductCode(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
-            vasLog.setProductName(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            TariffPlan tp = tariffPlanDao.findTariffPlanByServiceClass(String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            if (tp != null) {
+                vasLog.setProductName(tp.getPlanName());
+            } else {
+                vasLog.setProductName("Others");
+            }
+
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));
             vasLog.setRequestInterface(RequestInterface.API);
             vasLog.setRequestXml("");
@@ -178,7 +186,11 @@ public class VasService {
             vasLog.setResponseXml("");
             vasLog.setSenderId(tariffPlanChangeRequest.getSenderId());
             vasLog.setVasRequestReference(tariffPlanChangeRequest.getReference());
-            vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+            if (status) {
+                vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+            } else {
+                vasLog.setVasRequestStatus(RequestStatus.NOT_SENT);
+            }
             vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
             vasTransactionLogDao.save(vasLog);
@@ -189,7 +201,6 @@ public class VasService {
             log.error(message);
             log.error(ex.getMessage());
             resp = false;
-
         }
         return resp;
     }
