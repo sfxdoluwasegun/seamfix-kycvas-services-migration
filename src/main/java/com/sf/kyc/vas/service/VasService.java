@@ -5,6 +5,7 @@
  */
 package com.sf.kyc.vas.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sf.kyc.vas.dao.VasTransactionLogDao;
 import com.sf.kyc.vas.dao.DataBundleDao;
 import com.sf.kyc.vas.dao.SmsShortServiceCodeDao;
@@ -23,18 +24,21 @@ import com.sf.kyc.vas.model.DataBundleList;
 import com.sf.kyc.vas.model.GenericResponse;
 import com.sf.kyc.vas.model.SmsShortServiceCodeList;
 import com.sf.kyc.vas.model.TariffPlanChangeRequest;
+import com.sf.kyc.vas.model.TariffPlanChangeResponse;
 import com.sf.kyc.vas.model.TariffPlanList;
 import com.sf.kyc.vas.model.VasLogRequest;
 import com.sf.kyc.vas.model.VoiceBundleList;
-import com.sf.kyc.vas.soap.webservice.artifact.IAirService;
 import com.sf.kyc.vas.util.Utilities;
-import com.sf.kyc.vas.webservice.template.BaseSoapTemplate;
+import static com.sf.kyc.vas.util.VConstant.URL_PART;
+import com.sf.kyc.vas.webservice.template.BaseRestTemplate;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -48,12 +52,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class VasService {
 
-    @Value("${airtel.vas.url}")
-    private String airtelWsdlUrl;
+//    @Value("${airtel.vas.url}")
+//    private String airtelWsdlUrl;
+    @Value("${airtel.get.api}")
+    private String airtelGetApi;
 
-    @Value("${kyc.client.identifier}")
-    private String kycClientIdentifier;
-
+//    @Value("${kyc.client.identifier}")
+//    private String kycClientIdentifier;
     @Inject
     DataBundleDao dataBundleDao;
 
@@ -66,27 +71,64 @@ public class VasService {
     @Inject
     VoiceBundleDao voiceBundleDao;
 
+//    @Transactional
+//    public GenericResponse changeTariffPlan(TariffPlanChangeRequest tariffPlanChangeRequest) {
+//        GenericResponse resp = new GenericResponse();
+//        boolean done = false;
+//        BaseSoapTemplate soapTemplate = new BaseSoapTemplate();
+//        try {
+//            IAirService service = soapTemplate.getAirtelServiceViaWsdlUrl(airtelWsdlUrl);
+//            done = service.changeServiceClass(tariffPlanChangeRequest.getCustomerMsisdn(), tariffPlanChangeRequest.getServiceClass(), kycClientIdentifier);
+//            if (done) {
+//                logVasrequest(tariffPlanChangeRequest, true);
+//                resp.setResponseCode("00");
+//                resp.setResponseDescription("Customer tariff plan change successful");
+//            } else {
+//                logVasrequest(tariffPlanChangeRequest, false);
+//                resp.setResponseCode("06");
+//                resp.setResponseDescription("A Gateway service error occurred.");
+//            }
+//
+//        } catch (Exception ex) {
+//            String message = Utilities.getStackTrace(ex);
+//            logVasrequest(tariffPlanChangeRequest, false);
+//            log.error(message);
+//            log.error(ex.getMessage());
+//            resp.setResponseCode("02");
+//            resp.setResponseDescription("A KYC service error occurred");
+//        }
+//        return resp;
+//    }
     @Transactional
     public GenericResponse changeTariffPlan(TariffPlanChangeRequest tariffPlanChangeRequest) {
         GenericResponse resp = new GenericResponse();
-        boolean done = false;
-        BaseSoapTemplate soapTemplate = new BaseSoapTemplate();
+        ObjectMapper mapper = new ObjectMapper();
+        TariffPlanChangeResponse vResp = new TariffPlanChangeResponse();
+        MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+        BaseRestTemplate resTemplate = new BaseRestTemplate();
         try {
-            IAirService service = soapTemplate.getAirtelServiceViaWsdlUrl(airtelWsdlUrl);
-            done = service.changeServiceClass(tariffPlanChangeRequest.getCustomerMsisdn(), tariffPlanChangeRequest.getServiceClass(), kycClientIdentifier);
-            if (done) {
-                logVasrequest(tariffPlanChangeRequest, true);
+            String StringResp = "";
+            String finalUrl = buildUrl(airtelGetApi, URL_PART, tariffPlanChangeRequest.getCustomerMsisdn(), String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            vResp = resTemplate.getMethod(finalUrl, headers);
+            if ((vResp != null && vResp.getStatus() != null) && (vResp.getStatus().equalsIgnoreCase("Ok"))) {
+                StringResp = mapper.writeValueAsString(vResp);
+                logVasrequest(tariffPlanChangeRequest, true, StringResp);
                 resp.setResponseCode("00");
                 resp.setResponseDescription("Customer tariff plan change successful");
+            } else if ((vResp != null && vResp.getStatus() != null) && (!vResp.getStatus().equalsIgnoreCase("Ok"))) {
+                logVasrequest(tariffPlanChangeRequest, false, StringResp);
+                resp.setResponseCode("05");
+                resp.setResponseDescription(vResp.getDescription());
+
             } else {
-                logVasrequest(tariffPlanChangeRequest, false);
+                logVasrequest(tariffPlanChangeRequest, false, null);
                 resp.setResponseCode("06");
                 resp.setResponseDescription("A Gateway service error occurred.");
             }
 
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
-            logVasrequest(tariffPlanChangeRequest, false);
+            logVasrequest(tariffPlanChangeRequest, false, null);
             log.error(message);
             log.error(ex.getMessage());
             resp.setResponseCode("02");
@@ -153,7 +195,7 @@ public class VasService {
     }
 
     @Transactional
-    public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest, boolean status) {
+    public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest, boolean status, String apiResp) {
         boolean resp = false;
         try {
             VasTransactionLog vasLog = new VasTransactionLog();
@@ -187,8 +229,13 @@ public class VasService {
             vasLog.setSenderId(tariffPlanChangeRequest.getSenderId());
             vasLog.setVasRequestReference(tariffPlanChangeRequest.getReference());
             if (status) {
+                apiResp = apiResp.substring(0, Math.min(apiResp.length(), 255));
                 vasLog.setVasRequestStatus(RequestStatus.IN_PROGRESS);
+                vasLog.setResponseXml(apiResp);
             } else {
+                if (apiResp != null) {
+                    vasLog.setResponseXml(apiResp);
+                }
                 vasLog.setVasRequestStatus(RequestStatus.NOT_SENT);
             }
             vasLog.setVasRequestCategory(RequestCategory.TARIFF_PLAN_CHANGE);
@@ -291,6 +338,12 @@ public class VasService {
         }
         voiceBundleList.setVoicebundles(voiceBundles);
         return voiceBundleList;
+    }
+
+    public String buildUrl(String baseUrl, String urlPart, String msisdn, String serviceclassCode) {
+        String url = "";
+        url = String.format(urlPart, msisdn, serviceclassCode, msisdn);
+        return baseUrl + url;
     }
 
 }
