@@ -61,7 +61,7 @@ public class VasService {
 //    private String kycClientIdentifier;
     @Inject
     DataBundleDao dataBundleDao;
-
+    
     @Inject
     SmsShortServiceCodeDao smsShortServiceCodeDao;
     @Inject
@@ -109,6 +109,7 @@ public class VasService {
         try {
             String StringResp = "";
             String finalUrl = buildUrl(airtelGetApi, URL_PART, tariffPlanChangeRequest.getCustomerMsisdn(), String.valueOf(tariffPlanChangeRequest.getServiceClass()));
+            log.error("FIANL URL>>>>" + finalUrl);
             vResp = resTemplate.getMethod(finalUrl, headers);
             if ((vResp != null && vResp.getStatus() != null) && (vResp.getStatus().equalsIgnoreCase("Ok"))) {
                 StringResp = mapper.writeValueAsString(vResp);
@@ -119,13 +120,15 @@ public class VasService {
                 logVasrequest(tariffPlanChangeRequest, false, StringResp);
                 resp.setResponseCode("05");
                 resp.setResponseDescription(vResp.getDescription());
-
+                
             } else {
                 logVasrequest(tariffPlanChangeRequest, false, null);
                 resp.setResponseCode("06");
+                log.error("NO RESPONSE FROM THE GATEWAY Gateway service error occurred.");
+                log.error("");
                 resp.setResponseDescription("A Gateway service error occurred.");
             }
-
+            
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             logVasrequest(tariffPlanChangeRequest, false, null);
@@ -136,12 +139,12 @@ public class VasService {
         }
         return resp;
     }
-
+    
     @Transactional
     public boolean logVasrequest(VasLogRequest vasLogRequest) {
         boolean resp = false;
         try {
-
+            
             VasTransactionLog vasLog = new VasTransactionLog();
             VasTransactionLog dbVasLog = vasTransactionLogDao.findByClientRef(vasLogRequest.getVasRequestReference());
             if (dbVasLog != null) {
@@ -158,7 +161,8 @@ public class VasService {
             vasLog.setNarration(vasLogRequest.getNarration());
             vasLog.setProductCode(vasLogRequest.getProductCode());
             vasLog.setProductName(vasLogRequest.getProductName());
-            vasLog.setRequestDate(new Timestamp(vasLogRequest.getRequestDate().getTime()));
+            Date rd = vasLogRequest.getRequestDate() == null ? new Date() : vasLogRequest.getRequestDate();            
+            vasLog.setRequestDate(new Timestamp(rd.getTime()));
             vasLog.setRequestInterface(RequestInterface.API);
             if (vasLogRequest.getRequestInterface().equalsIgnoreCase("SMS")) {
                 vasLog.setRequestInterface(RequestInterface.SMS);
@@ -193,7 +197,7 @@ public class VasService {
         }
         return resp;
     }
-
+    
     @Transactional
     public boolean logVasrequest(TariffPlanChangeRequest tariffPlanChangeRequest, boolean status, String apiResp) {
         boolean resp = false;
@@ -218,7 +222,7 @@ public class VasService {
             } else {
                 vasLog.setProductName("Others");
             }
-
+            
             vasLog.setRequestDate(new Timestamp(new Date().getTime()));
             vasLog.setRequestInterface(RequestInterface.API);
             vasLog.setRequestXml("");
@@ -242,7 +246,7 @@ public class VasService {
             vasLog.setDeviceMacAddress(tariffPlanChangeRequest.getDeviceMacAddress());
             vasTransactionLogDao.save(vasLog);
             resp = true;
-
+            
         } catch (Exception ex) {
             String message = Utilities.getStackTrace(ex);
             log.error(message);
@@ -251,7 +255,7 @@ public class VasService {
         }
         return resp;
     }
-
+    
     @Transactional
     public TariffPlanList getTariffPlans() {
         TariffPlanList tariffPlanList = new TariffPlanList();
@@ -272,7 +276,7 @@ public class VasService {
         tariffPlanList.setTariffplans(tariffPlans);
         return tariffPlanList;
     }
-
+    
     @Transactional
     public SmsShortServiceCodeList getSmsShortServiceCodes() {
         SmsShortServiceCodeList smsShortServiceCodeList = new SmsShortServiceCodeList();
@@ -293,7 +297,7 @@ public class VasService {
         smsShortServiceCodeList.setSmsShortServiceCodes(smsShortServiceCodes);
         return smsShortServiceCodeList;
     }
-
+    
     @Transactional
     public DataBundleList getDataBundles() {
         DataBundleList dataBundleList = new DataBundleList();
@@ -316,7 +320,7 @@ public class VasService {
         dataBundleList.setDatabundles(dataBundles);
         return dataBundleList;
     }
-
+    
     @Transactional
     public VoiceBundleList getVoiceBundles() {
         VoiceBundleList voiceBundleList = new VoiceBundleList();
@@ -339,11 +343,11 @@ public class VasService {
         voiceBundleList.setVoicebundles(voiceBundles);
         return voiceBundleList;
     }
-
+    
     public String buildUrl(String baseUrl, String urlPart, String msisdn, String serviceclassCode) {
         String url = "";
         url = String.format(urlPart, msisdn, serviceclassCode, msisdn);
         return baseUrl + url;
     }
-
+    
 }

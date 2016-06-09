@@ -31,9 +31,9 @@ public class BaseRestTemplate {
             WebTarget target = client.target(baseUrl);
             Response rs = target.request().headers(headers).get();
             rs.bufferEntity();
-            log.info("status" + rs.getStatus());
+            log.error("status" + rs.getStatus());
             String re = rs.readEntity(String.class);
-            log.info("Response  " + re);
+            log.error("Response  " + re);
             TariffPlanChangeResponse resp = mapper.readValue(re, TariffPlanChangeResponse.class);
             return resp;
         } catch (Exception ex) {
